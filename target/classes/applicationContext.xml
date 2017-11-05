@@ -44,10 +44,17 @@
     <!--消息监听器-->
     <bean id="myMessageListener" class="listener.MyMessageListener"/>
 
-    <!--消息监听容器-->
-    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerContainer">
+    <!--队列消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="queueMessageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
         <property name="messageListener" ref="myMessageListener"/>
         <property name="destination" ref="activeMQQueue"/>
+    </bean>
+
+    <!--广播消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="topicMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="messageListener" ref="myMessageListener"/>
+        <property name="destination" ref="activeMQTopic"/>
     </bean>
 </beans>

@@ -25,6 +25,6 @@ public class Queue_Consumer {
         TextMessage receiveMessage = (TextMessage) jmsTemplate.receive(queue);
         String text = receiveMessage.getText();
         System.out.println("Queue_Consumer has received the message :" + text + " from producer");
-        
+
     }
 }
