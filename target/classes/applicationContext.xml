@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+    <!--开启注解扫描-->
+    <context:annotation-config/>
+
+    <!--JMS服务厂商提供的连接工厂-->
+    <bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://192.168.25.128:61616"/>
+    </bean>
+
+    <!--spring对厂商提供的连接工厂的包装,方便更换不同的JMS实现-->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <!--引用了实际的连接工厂-->
+        <property name="targetConnectionFactory" ref="targetConnectionFactory"/>
+    </bean>
+
+    <!--配置生产者,使用spring提供的jms模板-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!--将spring包装后的连接工厂注入-->
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+
+    <!--点对点消息队列-->
+    <bean class="org.apache.activemq.command.ActiveMQQueue" id="activeMQQueue">
+        <constructor-arg>
+            <!--指定队列名称-->
+            <value>spring_queue</value>
+        </constructor-arg>
+    </bean>
+
+    <!--发布/订阅消息队列-->
+    <bean class="org.apache.activemq.command.ActiveMQTopic" id="activeMQTopic">
+        <constructor-arg>
+            <value>spring_topic</value>
+        </constructor-arg>
+    </bean>
+
+    <!--消息监听器-->
+    <bean id="myMessageListener" class="listener.MyMessageListener"/>
+
+    <!--消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="messageListener" ref="myMessageListener"/>
+        <property name="destination" ref="activeMQQueue"/>
+    </bean>
+</beans>
